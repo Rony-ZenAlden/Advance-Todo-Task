@@ -19,6 +19,7 @@ class _TaskScreenState extends State<TaskScreen> {
   final TextEditingController taskDetailController = TextEditingController();
   final GlobalKey<FormState> formKey = GlobalKey<FormState>();
   final DataController controller = Get.put(DataController());
+  final TextEditingController text = TextEditingController();
   final DatabaseService databaseService = DatabaseService.instance;
 
   @override
