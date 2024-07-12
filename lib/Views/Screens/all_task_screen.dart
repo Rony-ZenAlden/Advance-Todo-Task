@@ -7,6 +7,7 @@ import 'package:go_lang/Views/Screens/task_screen.dart';
 import 'package:go_lang/Views/Screens/view_screen.dart';
 import 'package:go_lang/const/color.dart';
 import 'package:go_lang/const/storage/database_services.dart';
+import '../../Models/task_model.dart';
 
 class AllTaskScreen extends StatefulWidget {
   const AllTaskScreen({super.key});
@@ -23,10 +24,19 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
   void initState() {
     super.initState();
     _loadData();
+    _loadData1();
+    // state = DataController().getData();
+    // print(state);
+    // print('Helloooooooooooooooooooooooooooooooo');
   }
 
   _loadData() async {
     await _controller.getData();
+    setState(() {});
+  }
+
+  _loadData1() async {
+    await databaseService.getTasks();
     setState(() {});
   }
 
@@ -55,20 +65,19 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
     final width = MediaQuery.of(context).size.width;
     final height = MediaQuery.of(context).size.height;
     return Scaffold(
-      body: Stack(
-        children: [
-          Image.asset(
-            'assets/addtask.jpg',
-            fit: BoxFit.cover,
-            height: height,
-            width: width,
-          ),
-          RefreshIndicator(
-            onRefresh: () {
-              print(databaseService.getTasks());
-              return _loadData();
-            },
-            child: Column(
+      body: RefreshIndicator(
+        onRefresh: () {
+          return _loadData();
+        },
+        child: Stack(
+          children: [
+            Image.asset(
+              'assets/addtask.jpg',
+              fit: BoxFit.cover,
+              height: height,
+              width: width,
+            ),
+            Column(
               children: [
                 SizedBox(
                   height: height / 3.7,
@@ -129,79 +138,168 @@ class _AllTaskScreenState extends State<AllTaskScreen> {
                     ),
                   ],
                 ),
-                Expanded(
-                  child: ListView.builder(
-                    itemCount: _controller.myData.length,
-                    itemBuilder: (context, index) {
-                      return Dismissible(
-                        background: leftEdit,
-                        secondaryBackground: rightEdit,
-                        onDismissed: (DismissDirection direction) {
-                        },
-                        confirmDismiss: (DismissDirection direction) async {
-                          if (direction == DismissDirection.startToEnd) {
-                            Get.to(
-                              () => EditScreen(
-                                id: int.parse(
-                                  _controller.myData[index]["id"].toString(),
-                                ),
-                                taskName: '${_controller.myData[index]["task_name"]}',
-                                taskDetail: '${_controller.myData[index]["task_detail"]}',
-                              ),
-                              transition: Transition.circularReveal,
-                              duration: const Duration(milliseconds: 600),
-                            );
-                            return false;
-                          } else {
-                            if(direction == DismissDirection.endToStart) {
-                              _controller.deleteTask(_controller.myData[index]["id"].toString());
-                              return true;
-                            }
-                          }
-                        },
-                        key: ObjectKey(index),
-                        child: InkWell(
-                          onTap: () {
-                            Get.to(
-                              () => ViewScreen(
-                                id: int.parse(
-                                  _controller.myData[index]["id"].toString(),
-                                ),
-                                taskName:
-                                    '${_controller.myData[index]["task_name"]}',
-                                taskDetail:
-                                    '${_controller.myData[index]["task_detail"]}',
+                Obx(() {
+                  return _controller.state.value == 'false'
+                      ? FutureBuilder(
+                          future: databaseService.getTasks(),
+                          builder: (BuildContext context,
+                              AsyncSnapshot<List<TaskModel>?> snapshot) {
+                            return Expanded(
+                              child: ListView.builder(
+                                itemCount: snapshot.data?.length ?? 0,
+                                itemBuilder: (context, index) {
+                                  TaskModel taskModel = snapshot.data![index];
+                                  return Dismissible(
+                                    background: leftEdit,
+                                    secondaryBackground: rightEdit,
+                                    onDismissed:
+                                        (DismissDirection direction) {},
+                                    confirmDismiss:
+                                        (DismissDirection direction) async {
+                                      // if (direction == DismissDirection.startToEnd) {
+                                      //   Get.to(
+                                      //         () => EditScreen(
+                                      //       id: int.parse(
+                                      //         _controller.myData[index]["id"].toString(),
+                                      //       ),
+                                      //       taskName: '${_controller.myData[index]["task_name"]}',
+                                      //       taskDetail: '${_controller.myData[index]["task_detail"]}',
+                                      //     ),
+                                      //     transition: Transition.circularReveal,
+                                      //     duration: const Duration(milliseconds: 600),
+                                      //   );
+                                      //   return false;
+                                      // } else {
+                                      //   if(direction == DismissDirection.endToStart) {
+                                      //     _controller.deleteTask(_controller.myData[index]["id"].toString());
+                                      //     return true;
+                                      //   }
+                                      // }
+                                    },
+                                    key: ObjectKey(index),
+                                    child: InkWell(
+                                      onTap: () {
+                                        Get.to(
+                                          () => ViewScreen(
+                                            id: int.parse(
+                                              taskModel.id.toString(),
+                                            ),
+                                            taskName: '${taskModel.taskName}',
+                                            taskDetail:
+                                                '${taskModel.taskDetail}',
+                                          ),
+                                        );
+                                      },
+                                      child: Center(
+                                        child: Padding(
+                                          padding: const EdgeInsets.all(8.0),
+                                          child: Container(
+                                            width: width / 1.25,
+                                            height: height / 13.9,
+                                            color: AppColor.textHolder,
+                                            child: Center(
+                                              child: Text(
+                                                taskModel.taskName!,
+                                                style: TextStyle(
+                                                  color: Colors.grey.shade800,
+                                                  fontSize: 18,
+                                                ),
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ),
+                                  );
+                                },
                               ),
                             );
                           },
-                          child: Center(
-                            child: Padding(
-                              padding: const EdgeInsets.all(8.0),
-                              child: Container(
-                                width: width / 1.25,
-                                height: height / 13.9,
-                                color: AppColor.textHolder,
-                                child: Center(
-                                  child: Text(
-                                    _controller.myData[index]["task_name"],
-                                    style: TextStyle(
-                                      color: Colors.grey.shade800,
-                                      fontSize: 18,
+                        )
+                      : Expanded(
+                          child: ListView.builder(
+                            itemCount: _controller.myData.length,
+                            itemBuilder: (context, index) {
+                              return Dismissible(
+                                background: leftEdit,
+                                secondaryBackground: rightEdit,
+                                onDismissed: (DismissDirection direction) {},
+                                confirmDismiss:
+                                    (DismissDirection direction) async {
+                                  if (direction ==
+                                      DismissDirection.startToEnd) {
+                                    Get.to(
+                                      () => EditScreen(
+                                        id: int.parse(
+                                          _controller.myData[index]["id"]
+                                              .toString(),
+                                        ),
+                                        taskName:
+                                            '${_controller.myData[index]["task_name"]}',
+                                        taskDetail:
+                                            '${_controller.myData[index]["task_detail"]}',
+                                      ),
+                                      transition: Transition.circularReveal,
+                                      duration:
+                                          const Duration(milliseconds: 600),
+                                    );
+                                    return false;
+                                  } else {
+                                    if (direction ==
+                                        DismissDirection.endToStart) {
+                                      _controller.deleteTask(_controller
+                                          .myData[index]["id"]
+                                          .toString());
+                                      return true;
+                                    }
+                                  }
+                                },
+                                key: ObjectKey(index),
+                                child: InkWell(
+                                  onTap: () {
+                                    Get.to(
+                                      () => ViewScreen(
+                                        id: int.parse(
+                                          _controller.myData[index]["id"]
+                                              .toString(),
+                                        ),
+                                        taskName:
+                                            '${_controller.myData[index]["task_name"]}',
+                                        taskDetail:
+                                            '${_controller.myData[index]["task_detail"]}',
+                                      ),
+                                    );
+                                  },
+                                  child: Center(
+                                    child: Padding(
+                                      padding: const EdgeInsets.all(8.0),
+                                      child: Container(
+                                        width: width / 1.25,
+                                        height: height / 13.9,
+                                        color: AppColor.textHolder,
+                                        child: Center(
+                                          child: Text(
+                                            _controller.myData[index]
+                                                ["task_name"],
+                                            style: TextStyle(
+                                              color: Colors.grey.shade800,
+                                              fontSize: 18,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
                                     ),
                                   ),
                                 ),
-                              ),
-                            ),
+                              );
+                            },
                           ),
-                        ),
-                      );
-                    },
-                  ),
-                ),
+                        );
+                })
               ],
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

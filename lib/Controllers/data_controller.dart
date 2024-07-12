@@ -1,6 +1,4 @@
 import 'dart:convert';
-
-import 'package:flutter/foundation.dart';
 import 'package:get/get.dart';
 import 'package:go_lang/Controllers/service_controller.dart';
 
@@ -11,6 +9,7 @@ class DataController extends GetxController {
   RxBool isLoading = false.obs;
   List<dynamic> _myData = [];
   String? res;
+  RxString state = ''.obs;
 
   List<dynamic> get myData => _myData;
   Map<String, dynamic> _singleData = {};
@@ -25,8 +24,10 @@ class DataController extends GetxController {
     Response response = await serviceController.getData();
     if (response.statusCode == 200) {
       _myData = response.body;
+      state.value = 'true';
       update();
     } else {
+      state.value = 'false';
       CustomSnackBar.showErrorSnackBar(title: 'Error', message: 'No Data');
     }
     isLoading.value = false;

@@ -120,7 +120,7 @@ class _TaskScreenState extends State<TaskScreen> {
                               padding: EdgeInsets.symmetric(
                                   horizontal: 149, vertical: 4),
                               child: Text(
-                                'Save',
+                                'ADD',
                                 style: TextStyle(
                                   fontSize: 22,
                                 ),

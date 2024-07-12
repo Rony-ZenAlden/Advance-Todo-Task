@@ -1,3 +1,3 @@
 class AppUrl {
-  static const String BaseUrl = 'adsad';
+  static const String BaseUrl = 'Hello World!!!';
 }

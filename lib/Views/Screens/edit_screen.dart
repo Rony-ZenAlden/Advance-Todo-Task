@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:go_lang/Views/Screens/all_task_screen.dart';
 import '../../Controllers/data_controller.dart';
 import '../../const/color.dart';
 import '../../const/custom_snackbar.dart';
@@ -111,6 +112,8 @@ class _EditScreenState extends State<EditScreen> {
                           taskDetailController.text,
                           widget.id.toString(),
                         );
+                        controller.getData();
+                        Get.to(const AllTaskScreen(),transition: Transition.circularReveal);
                         CustomSnackBar.showSuccessSnackBar(
                             title: 'Success', message: 'Te Edit Has Completed.');
                       } else {
